@@ -1,10 +1,6 @@
-# Attention!!!
-
-This repository is outdated. The main repository is https://github.com/platmart/cloud_payments.
-
 # CloudPayments
 
-CloudPayments ruby client (http://cloudpayments.eu/Docs/Integration)
+CloudPayments ruby client (https://developers.cloudpayments.ru/en/)
 
 [![Build Status](https://travis-ci.org/undr/cloud_payments.svg)](https://travis-ci.org/undr/cloud_payments)
 
@@ -137,7 +133,7 @@ end
 
 ## Contributing
 
-1. Fork it ( https://github.com/undr/cloud_payments/fork )
+1. Fork it ( https://github.com/platmart/cloud_payments/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
