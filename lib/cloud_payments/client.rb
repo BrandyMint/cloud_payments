@@ -16,7 +16,6 @@ module CloudPayments
     end
 
     def perform_request(path, params = nil)
-      connection.basic_auth(config.public_key, config.secret_key)
       response = connection.post(path, (params ? convert_to_json(params) : nil), headers)
 
       Response.new(response.status, response.body, response.headers).tap do |response|
@@ -45,7 +44,10 @@ module CloudPayments
     end
 
     def build_connection
-      Faraday::Connection.new(config.host, config.connection_options, &config.connection_block)
+      Faraday::Connection.new(config.host, config.connection_options) do |conn|
+        conn.request :basic_auth, config.public_key, config.secret_key
+        config.connection_block.call(conn) if config.connection_block
+      end
     end
   end
 end
