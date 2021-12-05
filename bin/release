@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+VERSION=$1
+
+if [ -z $1 ] ; then
+  echo "Please provide version number: bin/release 1.0.0" && exit 1;
+fi
+
+printf "module CloudPayments\n  VERSION = \"$VERSION\"\nend\n" > ./lib/cloud_payments/version.rb
+bundle
+git add Gemfile.lock lib/cloud_payments/version.rb
+git commit -m "Bump version for $VERSION"
+git push
+git tag v$VERSION
+git push --tags
+gem build cloud_payments.gemspec
+gem push "cloud_payments-$VERSION.gem"
