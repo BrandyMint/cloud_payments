@@ -145,6 +145,23 @@ CloudPayments.client.kassa.receipt({
 })
 ```
 
+## Kassa Correction Receipt (Формирование чека коррекции)
+
+CloudPayments Kassa API
+(https://developers.cloudkassir.ru/#formirovanie-cheka-korrektsii)
+
+```ruby
+CloudPayments.client.kassa.correction_receipt({
+  oragnization_inn: '...',
+  vat_rate: '...,
+  taxation_system: '...',
+  correction_receipt_type: '...',
+  cause_correction: '...',
+  amounts: '...',
+  ..
+})
+```
+
 ## Apple Pay Start Session
 [Start Apple Pay session](https://developers.cloudpayments.ru/#zapusk-sessii-dlya-oplaty-cherez-apple-pay)
 ```ruby
