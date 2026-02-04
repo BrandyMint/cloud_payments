@@ -31,7 +31,10 @@ module CloudPayments
 
     def headers(request_id: nil)
       h = { 'Content-Type' => 'application/json' }
-      h['X-Request-ID'] = request_id if request_id && !request_id.to_s.empty?
+      if request_id
+        request_id_str = request_id.to_s.strip
+        h['X-Request-ID'] = request_id_str unless request_id_str.empty?
+      end
       h
     end
 

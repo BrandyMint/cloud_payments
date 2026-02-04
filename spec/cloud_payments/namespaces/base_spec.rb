@@ -25,6 +25,22 @@ describe CloudPayments::Namespaces::Base do
       specify{ expect(subject.request(nil, request_params)) }
     end
 
+    context 'with request_id' do
+      let(:request_id) { 'test-idempotency-key' }
+
+      before do
+        stub_request(:post, 'http://localhost:9292/testnamespace')
+          .with(
+            body: request_body,
+            headers: headers.merge('X-Request-ID' => request_id),
+            basic_auth: ['user', 'pass']
+          )
+          .to_return(body: successful_body, headers: headers)
+      end
+
+      specify { expect(subject.request(nil, request_params, request_id: request_id)).to include(success: true) }
+    end
+
     context 'with path' do
       before{ stub_api('/testnamespace/path', request_body).to_return(body: successful_body, headers: headers) }
 

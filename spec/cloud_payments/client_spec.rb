@@ -21,6 +21,14 @@ describe CloudPayments::Client do
       expect(client.send(:headers, request_id: '')).not_to have_key('X-Request-ID')
     end
 
+    it 'does not include X-Request-ID when whitespace only' do
+      expect(client.send(:headers, request_id: '   ')).not_to have_key('X-Request-ID')
+    end
+
+    it 'strips whitespace from request_id' do
+      expect(client.send(:headers, request_id: '  my-key  ')).to include('X-Request-ID' => 'my-key')
+    end
+
     it 'includes X-Request-ID when provided' do
       expect(client.send(:headers, request_id: 'test-idempotency-key')).to include('X-Request-ID' => 'test-idempotency-key')
     end

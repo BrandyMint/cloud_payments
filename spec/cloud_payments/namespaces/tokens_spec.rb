@@ -15,6 +15,30 @@ describe CloudPayments::Namespaces::Tokens do
   } }
 
   describe '#charge' do
+    context 'with request_id' do
+      let(:request_id) { 'charge:invoice-12345' }
+      let(:response_body) do
+        <<~JSON
+          {"Success":true,"Model":{
+            "TransactionId":12345,"Amount":10.0,"Currency":"RUB","CurrencyCode":0,
+            "Status":"Completed","StatusCode":3,"TestMode":true,
+            "CardFirstSix":"411111","CardLastFour":"1111","CardType":"Visa"
+          }}
+        JSON
+      end
+
+      before do
+        stub_request(:post, 'http://localhost:9292/payments/tokens/charge')
+          .with(
+            headers: { 'Content-Type' => 'application/json', 'X-Request-ID' => request_id },
+            basic_auth: ['user', 'pass']
+          )
+          .to_return(status: 200, body: response_body, headers: { 'Content-Type' => 'application/json' })
+      end
+
+      specify { expect(subject.charge(attributes, request_id: request_id)).to be_instance_of(CloudPayments::Transaction) }
+    end
+
     context 'config.raise_banking_errors = true' do
       before { CloudPayments.config.raise_banking_errors = true }
       after { CloudPayments.config.raise_banking_errors = false }
