@@ -218,6 +218,39 @@ def recurrent
 end
 ```
 
+## Idempotency
+
+CloudPayments supports idempotent requests via `X-Request-ID` header.
+Results are cached for **1 hour** (server-side, not configurable).
+
+```ruby
+# Use deterministic keys based on business identifiers
+CloudPayments.client.payments.tokens.charge(
+  { token: token, amount: 100, currency: 'RUB', invoice_id: invoice_id },
+  request_id: "charge:#{invoice_id}"
+)
+```
+
+This is useful for preventing double charges in scenarios like:
+- Network timeouts where the payment succeeded but client didn't receive response
+- Infrastructure errors after successful payment
+- Retry mechanisms re-sending the same charge request
+
+**Important:** Never include timestamps or random values in the key — this defeats the purpose of idempotency.
+
+### Examples
+
+```ruby
+# Charge — prevent double charge for the same invoice
+client.payments.tokens.charge(attributes, request_id: "charge:#{invoice_id}")
+
+# Refund — prevent double refund for the same transaction
+client.payments.refund(transaction_id, amount, request_id: "refund:#{transaction_id}")
+
+# Subscription — prevent duplicate subscription creation
+client.subscriptions.create(attributes, request_id: "subscription:#{account_id}:#{plan_id}")
+```
+
 ## Contributing
 
 1. Fork it ( https://github.com/platmart/cloud_payments/fork )

@@ -15,8 +15,8 @@ module CloudPayments
       @connection = build_connection
     end
 
-    def perform_request(path, params = nil)
-      response = connection.post(path, (params ? convert_to_json(params) : nil), headers)
+    def perform_request(path, params = nil, request_id: nil)
+      response = connection.post(path, (params ? convert_to_json(params) : nil), headers(request_id: request_id))
 
       Response.new(response.status, response.body, response.headers).tap do |response|
         raise_transport_error(response) if response.status.to_i >= 300
@@ -29,8 +29,13 @@ module CloudPayments
       config.serializer.dump(data)
     end
 
-    def headers
-      { 'Content-Type' => 'application/json' }
+    def headers(request_id: nil)
+      h = { 'Content-Type' => 'application/json' }
+      if request_id
+        request_id_str = request_id.to_s.strip
+        h['X-Request-ID'] = request_id_str unless request_id_str.empty?
+      end
+      h
     end
 
     def logger
