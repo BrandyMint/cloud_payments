@@ -32,5 +32,6 @@ RSpec.configure do |config|
   config.after :each do
     CloudPayments.config = default_config
     CloudPayments.client = CloudPayments::Client.new
+    Thread.current[CloudPayments::CURRENT_REQUEST_ID_KEY] = nil
   end
 end

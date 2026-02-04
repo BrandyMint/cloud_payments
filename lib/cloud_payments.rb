@@ -13,6 +13,20 @@ require 'cloud_payments/webhooks'
 module CloudPayments
   extend self
 
+  CURRENT_REQUEST_ID_KEY = :cloud_payments_request_id
+
+  def with_request_id(request_id)
+    previous = Thread.current[CURRENT_REQUEST_ID_KEY]
+    Thread.current[CURRENT_REQUEST_ID_KEY] = request_id
+    yield
+  ensure
+    Thread.current[CURRENT_REQUEST_ID_KEY] = previous
+  end
+
+  def current_request_id
+    Thread.current[CURRENT_REQUEST_ID_KEY]
+  end
+
   def config=(value)
     @config = value
   end

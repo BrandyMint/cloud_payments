@@ -30,7 +30,9 @@ module CloudPayments
     end
 
     def headers
-      { 'Content-Type' => 'application/json' }
+      h = { 'Content-Type' => 'application/json' }
+      h['X-Request-ID'] = CloudPayments.current_request_id if CloudPayments.current_request_id
+      h
     end
 
     def logger
