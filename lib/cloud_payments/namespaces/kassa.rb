@@ -13,31 +13,31 @@ module CloudPayments
         'kkt'
       end
 
-      def receipt(attributes)
+      def receipt(attributes, request_id: nil)
         attributes.fetch(:inn)  { raise InnNotProvided.new('inn attribute is required') }
         attributes.fetch(:type) { raise TypeNotProvided.new('type attribute is required') }
         attributes.fetch(:customer_receipt)  { raise CustomerReceiptNotProvided.new('customer_receipt is required') }
 
-        request(:receipt, attributes)
+        request(:receipt, attributes, request_id: request_id)
       end
 
-      def correction_receipt(attributes)
+      def correction_receipt(attributes, request_id: nil)
         missing_attributes = CORRECTION_RECEIPT_REQUIRED_ATTRIBUTES.select do |attr|
           !attributes.key?(attr)
         end
         raise KeyNotProvided.new("Attribute(s) #{missing_attributes.join(',')} are required") if missing_attributes.any?
 
-        request('correction-receipt', correction_receipt_data: attributes)
+        request('correction-receipt', { correction_receipt_data: attributes }, request_id: request_id)
       end
 
       # Запрос статуса чека коррекции
       def correction_receipt_status(id)
-        request('correction-receipt/status/get', id: id)
+        request('correction-receipt/status/get', { id: id })
       end
 
       # Получение данных чека коррекции
       def correction_receipt_info(id)
-        request('correction-receipt/get', id: id)
+        request('correction-receipt/get', { id: id })
       end
     end
   end

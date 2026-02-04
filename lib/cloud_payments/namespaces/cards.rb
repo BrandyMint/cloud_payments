@@ -2,18 +2,18 @@
 module CloudPayments
   module Namespaces
     class Cards < Base
-      def charge(attributes)
-        response = request(:charge, attributes)
+      def charge(attributes, request_id: nil)
+        response = request(:charge, attributes, request_id: request_id)
         instantiate(response[:model])
       end
 
-      def auth(attributes)
-        response = request(:auth, attributes)
+      def auth(attributes, request_id: nil)
+        response = request(:auth, attributes, request_id: request_id)
         instantiate(response[:model])
       end
 
-      def post3ds(attributes)
-        response = request(:post3ds, attributes)
+      def post3ds(attributes, request_id: nil)
+        response = request(:post3ds, attributes, request_id: request_id)
         instantiate(response[:model])
       end
 

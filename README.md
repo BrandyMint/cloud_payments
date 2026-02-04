@@ -225,15 +225,10 @@ Results are cached for **1 hour** (server-side, not configurable).
 
 ```ruby
 # Use deterministic keys based on business identifiers
-CloudPayments.with_request_id("charge:#{invoice_id}") do
-  CloudPayments.client.payments.tokens.charge(
-    token: token,
-    amount: 100,
-    currency: 'RUB',
-    account_id: account_id,
-    invoice_id: invoice_id
-  )
-end
+CloudPayments.client.payments.tokens.charge(
+  { token: token, amount: 100, currency: 'RUB', invoice_id: invoice_id },
+  request_id: "charge:#{invoice_id}"
+)
 ```
 
 This is useful for preventing double charges in scenarios like:
@@ -247,19 +242,13 @@ This is useful for preventing double charges in scenarios like:
 
 ```ruby
 # Charge — prevent double charge for the same invoice
-CloudPayments.with_request_id("charge:#{invoice_id}") do
-  client.payments.tokens.charge(...)
-end
+client.payments.tokens.charge(attributes, request_id: "charge:#{invoice_id}")
 
 # Refund — prevent double refund for the same transaction
-CloudPayments.with_request_id("refund:#{transaction_id}") do
-  client.payments.refund(transaction_id, amount)
-end
+client.payments.refund(transaction_id, amount, request_id: "refund:#{transaction_id}")
 
 # Subscription — prevent duplicate subscription creation
-CloudPayments.with_request_id("subscription:#{account_id}:#{plan_id}") do
-  client.subscriptions.create(...)
-end
+client.subscriptions.create(attributes, request_id: "subscription:#{account_id}:#{plan_id}")
 ```
 
 ## Contributing

@@ -9,21 +9,27 @@ describe CloudPayments::Client do
       expect(client.send(:headers)).to include('Content-Type' => 'application/json')
     end
 
-    it 'does not include X-Request-ID when not set' do
+    it 'does not include X-Request-ID when not provided' do
       expect(client.send(:headers)).not_to have_key('X-Request-ID')
     end
 
-    it 'includes X-Request-ID when set via with_request_id' do
-      CloudPayments.with_request_id('test-idempotency-key') do
-        expect(client.send(:headers)).to include('X-Request-ID' => 'test-idempotency-key')
-      end
+    it 'does not include X-Request-ID when nil' do
+      expect(client.send(:headers, request_id: nil)).not_to have_key('X-Request-ID')
+    end
+
+    it 'does not include X-Request-ID when empty string' do
+      expect(client.send(:headers, request_id: '')).not_to have_key('X-Request-ID')
+    end
+
+    it 'includes X-Request-ID when provided' do
+      expect(client.send(:headers, request_id: 'test-idempotency-key')).to include('X-Request-ID' => 'test-idempotency-key')
     end
   end
 
-  describe 'X-Request-ID header in requests' do
+  describe '#perform_request with request_id' do
     let(:request_id) { 'charge:invoice-12345' }
 
-    before do
+    it 'sends X-Request-ID header with the request' do
       stub_request(:post, 'http://localhost:9292/payments/tokens/charge')
         .with(
           headers: {
@@ -37,33 +43,23 @@ describe CloudPayments::Client do
           body: '{"Success":true,"Model":{"TransactionId":12345,"Status":"Completed"}}',
           headers: { 'Content-Type' => 'application/json' }
         )
+
+      response = CloudPayments.client.perform_request('/payments/tokens/charge', { amount: 100 }, request_id: request_id)
+      expect(response.status).to eq(200)
     end
 
-    it 'sends X-Request-ID header with the request' do
-      CloudPayments.with_request_id(request_id) do
-        response = CloudPayments.client.perform_request('/payments/tokens/charge', { amount: 100 })
-        expect(response.status).to eq(200)
-      end
-    end
-  end
-
-  describe 'request without X-Request-ID' do
-    before do
+    it 'does not send X-Request-ID header when not provided' do
+      request_headers = nil
       stub_request(:post, 'http://localhost:9292/payments/tokens/charge')
-        .with(
-          headers: { 'Content-Type' => 'application/json' },
-          basic_auth: ['user', 'pass']
-        )
+        .with { |request| request_headers = request.headers; true }
         .to_return(
           status: 200,
           body: '{"Success":true,"Model":{"TransactionId":12345,"Status":"Completed"}}',
           headers: { 'Content-Type' => 'application/json' }
         )
-    end
 
-    it 'does not send X-Request-ID header when not set' do
-      response = CloudPayments.client.perform_request('/payments/tokens/charge', { amount: 100 })
-      expect(response.status).to eq(200)
+      CloudPayments.client.perform_request('/payments/tokens/charge', { amount: 100 })
+      expect(request_headers).not_to have_key('X-Request-Id')
     end
   end
 end
