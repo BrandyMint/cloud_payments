@@ -2,6 +2,7 @@
 module CloudPayments
   class Transaction < Model
     AWAITING_AUTHENTICATION = 'AwaitingAuthentication'
+    COMPLETED = 'Completed'
     COMPLECTED = 'Completed'
     AUTHORIZED = 'Authorized'
     CANCELLED = 'Cancelled'
@@ -70,8 +71,10 @@ module CloudPayments
     end
 
     def completed?
-      status == COMPLECTED
+      status == COMPLETED
     end
+
+    alias successful? completed?
 
     def authorized?
       status == AUTHORIZED

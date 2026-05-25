@@ -40,6 +40,21 @@ module CloudPayments
         response = request(:find, { invoice_id: invoice_id })
         Transaction.new(response[:model])
       end
+
+      def list(date:, time_zone:, page_number: nil, page_size: nil, request_id: nil)
+        response = request(
+          :list,
+          {
+            date: date,
+            time_zone: time_zone,
+            page_number: page_number,
+            page_size: page_size
+          }.compact,
+          request_id: request_id
+        )
+
+        Array(response[:model]).map { |attributes| Transaction.new(attributes) }
+      end
     end
   end
 end

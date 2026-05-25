@@ -212,4 +212,20 @@ describe CloudPayments::Namespaces::Payments do
       end
     end
   end
+
+  describe '#list' do
+    let(:date) { '2026-01-12' }
+    let(:time_zone) { 'MSK' }
+
+    before { stub_api_request('payments/list/successful').perform }
+
+    it 'returns an array of transactions' do
+      result = subject.list(date: date, time_zone: time_zone)
+
+      expect(result).to all(be_a(CloudPayments::Transaction))
+      expect(result.map(&:id)).to eq([3272956218, 3272956146])
+      expect(result.map(&:created_at).map(&:iso8601)).to eq(['2026-01-12T00:03:30+00:00', '2026-01-12T00:03:27+00:00'])
+      expect(result.map(&:successful?)).to eq([true, true])
+    end
+  end
 end
