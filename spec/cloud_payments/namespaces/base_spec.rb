@@ -9,6 +9,7 @@ describe CloudPayments::Namespaces::Base do
   let(:successful_body){ '{"Model":{},"Success":true}' }
   let(:failed_body){ '{"Success":false,"Message":"Error message"}' }
   let(:failed_transaction_body){ '{"Model":{"ReasonCode":5041,"CardHolderMessage":"Contact your bank"},"Success":false}' }
+  let(:failed_transaction_unknown_reason_body){ '{"Model":{"ReasonCode":5999,"CardHolderMessage":"Unknown reason"},"Success":false}' }
   let(:request_body){ '{"Amount":120,"CurrencyCode":"RUB"}' }
   let(:request_params){ { amount: 120, currency_code: 'RUB' } }
 
@@ -94,5 +95,19 @@ describe CloudPayments::Namespaces::Base do
         specify{ expect{ subject.request(:path, request_params) }.not_to raise_error }
       end
     end
+
+    context 'when failed transaction with unknown reason code' do
+      before { stub_api('/testnamespace/path', request_body).to_return(body: failed_transaction_unknown_reason_body, headers: headers) }
+
+      context 'config.raise_banking_errors = true' do
+        before { CloudPayments.config.raise_banking_errors = true }
+
+        specify do
+          expect { subject.request(:path, request_params) }
+            .to raise_error(CloudPayments::Client::ReasonedGatewayError, 'Unknown reason')
+        end
+      end
+    end
+
   end
 end

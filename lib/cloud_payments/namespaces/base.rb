@@ -36,7 +36,10 @@ module CloudPayments
       end
 
       def raise_reasoned_gateway_error(body)
-        fail Client::GATEWAY_ERRORS[body[:model][:reason_code]].new(body) if reason_present?(body)
+        return unless reason_present?(body)
+
+        error_class = Client::GATEWAY_ERRORS[body.dig(:model, :reason_code)] || Client::ReasonedGatewayError
+        fail error_class, reasoned_error_message(body)
       end
 
       def raise_raw_gateway_error(body)
@@ -44,7 +47,20 @@ module CloudPayments
       end
 
       def reason_present?(body)
-        !body[:model].nil? && !body[:model].empty? && !body[:model][:reason_code].nil? && CloudPayments.config.raise_banking_errors
+        !body[:model].nil? &&
+          !body[:model].empty? &&
+          !body[:model][:reason_code].nil? &&
+          CloudPayments.config.raise_banking_errors
+      end
+
+      def reasoned_error_message(body)
+        message = body[:message]
+        return message unless message.nil? || message.empty?
+
+        card_holder_message = body.dig(:model, :card_holder_message)
+        return card_holder_message unless card_holder_message.nil? || card_holder_message.empty?
+
+        "CloudPayments gateway error (reason_code=#{body.dig(:model, :reason_code).inspect})"
       end
     end
   end
